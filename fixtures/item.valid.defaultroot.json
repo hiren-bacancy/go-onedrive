@@ -1,0 +1,29 @@
+{
+  "createdBy": {
+    "user": {
+      "displayName": "Gordan Grasarevic",
+      "id": "ebcec5405197f0b"
+    }
+  },
+  "createdDateTime": "2015-03-08T03:26:46.443Z",
+  "cTag": "ctag",
+  "eTag": "etag",
+  "id": "EBCEC5405197F0B!101",
+  "lastModifiedBy": {
+    "application": {
+      "displayName": "OneDrive website",
+      "id": "44048800"
+    },
+    "user": {
+      "displayName": "Gordan Grasarevic",
+      "id": "ebcec5405197f0b"
+    }
+  },
+  "lastModifiedDateTime": "2015-03-09T12:05:17.333Z",
+  "name": "root",
+  "size": 17546845,
+  "webUrl": "https://onedrive.live.com/?cid=0ebcec5405197f0b",
+  "folder": {
+    "childCount": 3
+  }
+}

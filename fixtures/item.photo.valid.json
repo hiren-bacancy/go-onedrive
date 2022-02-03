@@ -1,0 +1,52 @@
+{
+"@content.downloadUrl": "https://download-url.com/someid",
+"createdBy": {
+  "user": {
+    "displayName": "Gordan Grasarevic",
+    "id": "0123456789abc"
+  }
+},
+"createdDateTime": "2015-03-08T03:26:46.443Z",
+"cTag": "ctag",
+"eTag": "etag",
+"id": "0123456789abc!119",
+"lastModifiedBy": {
+  "application": {
+    "displayName": "OneDrive website",
+    "id": "44048800"
+  },
+  "user": {
+    "displayName": "Gordan Grasarevic",
+    "id": "0123456789abc"
+  }
+},
+"lastModifiedDateTime": "2015-03-09T12:05:17.333Z",
+"name": "IMG_2538.JPG",
+"parentReference": {
+  "driveId": "0123456789abc",
+  "id": "0123456789abc!104",
+  "path": "/drive/root:/Test folder 1"
+},
+"size": 403305,
+"webUrl": "https://onedrive.live.com/redir?page=self&resid=0123456789abc!119",
+"file": {
+  "hashes": {
+    "crc32Hash": "4DD1C268",
+    "sha1Hash": "D528F485B3A594A36F00ED7633DC2AE1C442A93D"
+  },
+  "mimeType": "image/jpeg"
+},
+"image": {
+  "height": 480,
+  "width": 720
+},
+"photo": {
+  "cameraMake": "Canon",
+  "cameraModel": "Canon EOS 600D",
+  "exposureDenominator": 200.0,
+  "exposureNumerator": 1.0,
+  "focalLength": 18.0,
+  "fNumber": 9.0,
+  "takenDateTime": "2013-11-28T11:57:27Z"
+}
+}
