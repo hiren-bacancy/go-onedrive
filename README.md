@@ -4,14 +4,14 @@
 - [x] Get Default Drive
 - [x] Get Drive
 - [x] List all available drives
-- [ ] Items
-- [ ] Create
+- [x] Items
+- [x] Create
   - [x] Create folder
 - [x] Copy
   - [x] Copy file/folder
   - [x] Async job to track progress
 - [x] Delete
-- [ ] Download
+- [x] Download
 - [x] List children
 - [x] Search
 - [x] Move

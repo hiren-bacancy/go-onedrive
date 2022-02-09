@@ -95,15 +95,31 @@ type Item struct {
 func itemURIFromID(itemID string) string {
 	switch itemID {
 	case "", "root":
-		return "/drive/root"
+		return "/me/drive/root"
 	default:
-		return fmt.Sprintf("/drive/items/%s", itemID)
+		return fmt.Sprintf("/me/drive/items/%s", itemID)
 	}
 }
 
 // Get returns an item with the specified ID.
 func (is *ItemService) Get(itemID string) (*Item, *http.Response, error) {
 	req, err := is.newRequest("GET", itemURIFromID(itemID), nil, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	item := new(Item)
+	resp, err := is.do(req, item)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return item, resp, nil
+}
+
+// GetFolder returns an item with the specified ID.
+func (is *ItemService) GetFolder(path string) (*Item, *http.Response, error) {
+	req, err := is.newRequest("GET", fmt.Sprintf("/me%s", path), nil, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -125,7 +141,7 @@ func (is *ItemService) GetDefaultDriveRootFolder() (*Item, *http.Response, error
 
 // ListChildren returns a collection of all the Items under an Item
 func (is *ItemService) ListChildren(itemID string, paginate string) (*Items, *http.Response, error) {
-	reqURI := fmt.Sprintf("/drive/items/%s/children%s", itemID, paginate)
+	reqURI := fmt.Sprintf("/me/drive/items/%s/children%s", itemID, paginate)
 	req, err := is.newRequest("GET", reqURI, nil, nil)
 	if err != nil {
 		return nil, nil, err
@@ -152,8 +168,8 @@ func (is *ItemService) CreateFolder(parentID, folderName string) (*Item, *http.R
 		Folder: new(FolderFacet),
 	}
 
-	path := fmt.Sprintf("/drive/items/%s/children/%s", parentID, folderName)
-	req, err := is.newRequest("PUT", path, nil, folder)
+	path := fmt.Sprintf("/me/drive/items/%s/children", parentID)
+	req, err := is.newRequest("POST", path, nil, folder)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -173,15 +189,13 @@ type newWebUpload struct {
 	File      *FileFacet `json:"file"`
 }
 
-// Move changes the parent folder for a OneDrive Item resource.
-// See: http://onedrive.github.io/items/move.htm
 func (is ItemService) Update(item *Item, ifMatch bool) (*Item, *http.Response, error) {
 	requestHeaders := make(map[string]string)
 	if ifMatch {
 		requestHeaders["if-match"] = item.ETag
 	}
 
-	path := fmt.Sprintf("/drive/items/%s", item.ID)
+	path := fmt.Sprintf("/me/drive/items/%s", item.ID)
 	req, err := is.newRequest("PATCH", path, requestHeaders, item)
 	if err != nil {
 		return nil, nil, err
@@ -205,7 +219,7 @@ func (is *ItemService) Delete(itemID, eTag string) (bool, *http.Response, error)
 		requestHeaders["if-match"] = eTag
 	}
 
-	path := fmt.Sprintf("/drive/items/%s", itemID)
+	path := fmt.Sprintf("/me/drive/items/%s", itemID)
 	req, err := is.newRequest("DELETE", path, requestHeaders, nil)
 	if err != nil {
 		return false, nil, err
@@ -222,7 +236,7 @@ func (is *ItemService) Delete(itemID, eTag string) (bool, *http.Response, error)
 // Move changes the parent folder for a OneDrive Item resource.
 // See: http://onedrive.github.io/items/move.htm
 func (is ItemService) Move(itemID, parentReference ItemReference) (*Item, *http.Response, error) {
-	path := fmt.Sprintf("/drive/items/%s", itemID)
+	path := fmt.Sprintf("/me/drive/items/%s", itemID)
 	req, err := is.newRequest("PATCH", path, nil, parentReference)
 	if err != nil {
 		return nil, nil, err
@@ -237,7 +251,7 @@ func (is ItemService) Move(itemID, parentReference ItemReference) (*Item, *http.
 	return item, resp, nil
 }
 
-// Move changes the parent folder for a OneDrive Item resource.
+// Copy creates a new OneDrive Item resource.
 // See: http://onedrive.github.io/items/move.htm
 func (is ItemService) Copy(itemID, name string, parentReference ItemReference) (*Item, *http.Response, error) {
 	copyAction := struct {
@@ -248,7 +262,7 @@ func (is ItemService) Copy(itemID, name string, parentReference ItemReference) (
 	// The copy action requires a Prefer: respond-async header
 	headers := map[string]string{"Prefer": "respond-async"}
 
-	path := fmt.Sprintf("/drive/items/%s/action.copy", itemID)
+	path := fmt.Sprintf("/me/drive/items/%s/copy", itemID)
 	req, err := is.newRequest("POST", path, headers, copyAction)
 	if err != nil {
 		return nil, nil, err
@@ -265,7 +279,7 @@ func (is ItemService) Copy(itemID, name string, parentReference ItemReference) (
 
 // Export
 func (is ItemService) Export(itemID, mimeType string) (*http.Response, error) {
-	path := fmt.Sprintf("/drive/items/%s/content?format=%s", itemID, mimeType)
+	path := fmt.Sprintf("/me/drive/items/%s/content?format=%s", itemID, mimeType)
 	req, err := is.newRequest("GET", path, nil, nil)
 	if err != nil {
 		return nil, err
@@ -293,4 +307,37 @@ func (is ItemService) Download(itemID string) (*http.Response, error) {
 	}
 
 	return resp, nil
+}
+
+// Search
+func (is *ItemService) Search(query string, parentID string, paginate string) (*Items, error) {
+	var reqURI string
+	switch parentID {
+	case "", "root":
+		if query != "" {
+			reqURI = fmt.Sprintf("/me/drive/root/search(q='%s')%s", query, paginate)
+		} else {
+			reqURI = fmt.Sprintf("/me/drive/items/%s/children%s", parentID, paginate)
+		}
+	case "shared":
+		reqURI = fmt.Sprintf("/me/drive/sharedWithMe%s", paginate)
+	default:
+		if query != "" {
+			reqURI = fmt.Sprintf("/me/drive/items/%s/search(q='%s')%s", parentID, query, paginate)
+		} else {
+			reqURI = fmt.Sprintf("/me/drive/items/%s/children%s", parentID, paginate)
+		}
+	}
+	req, err := is.newRequest("GET", reqURI, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	items := new(Items)
+	_, err = is.do(req, items)
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }
